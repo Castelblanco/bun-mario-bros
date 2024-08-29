@@ -22,6 +22,30 @@ export class GameScene extends Scene {
         this.gameHeight = +this.game.config.height;
 
         this.anims.create({
+            key: 'mario-idle',
+            frames: [{ key: 'mario', frame: 0 }],
+            frameRate: 9,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'mario-grown-idle',
+            frames: [{ key: 'mario-grown', frame: 0 }],
+            frameRate: 9,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'mario-collect-super-mushroom',
+            frames: [
+                { key: 'mario', frame: 0 },
+                { key: 'mario-grown', frame: 0 },
+            ],
+            frameRate: 12,
+            repeat: 4,
+        });
+
+        this.anims.create({
             key: 'mario-walk',
             frames: this.anims.generateFrameNumbers('mario', {
                 start: 3,
@@ -32,8 +56,11 @@ export class GameScene extends Scene {
         });
 
         this.anims.create({
-            key: 'mario-idle',
-            frames: [{ key: 'mario', frame: 0 }],
+            key: 'mario-grown-walk',
+            frames: this.anims.generateFrameNumbers('mario-grown', {
+                start: 3,
+                end: 1,
+            }),
             frameRate: 9,
             repeat: -1,
         });
@@ -41,6 +68,13 @@ export class GameScene extends Scene {
         this.anims.create({
             key: 'mario-jump',
             frames: [{ key: 'mario', frame: 5 }],
+            frameRate: 9,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'mario-grown-jump',
+            frames: [{ key: 'mario-grown', frame: 5 }],
             frameRate: 9,
             repeat: -1,
         });
@@ -99,6 +133,11 @@ export class GameScene extends Scene {
             ])
             .playAnimation('coin-idle');
 
+        const superMushroom = this.physics.add
+            .sprite(200, 200, 'super-mushroom')
+            .setGravityY(400)
+            .setScale(2);
+
         this.enemy.anims.play('goomba-walk', true);
         const floor = this.physics.add.staticGroup();
 
@@ -129,6 +168,7 @@ export class GameScene extends Scene {
 
         this.physics.add.collider(this.player, floor);
         this.physics.add.collider(this.enemy, floor);
+        this.physics.add.collider(superMushroom, floor);
         this.physics.add.collider(
             this.player,
             this.enemy,
@@ -139,6 +179,12 @@ export class GameScene extends Scene {
             this.coins,
             this.onCollectCoin as any
         );
+        this.physics.add.overlap(
+            this.player,
+            superMushroom,
+            this.onCollectSuperMushroom as any
+        );
+
         this.physics.world.setBounds(0, 0, 2000, this.gameHeight);
         this.cameras.main.setBounds(0, 0, 2000, this.gameHeight);
         this.cameras.main.startFollow(this.player, false, 1, 0);
@@ -189,6 +235,26 @@ export class GameScene extends Scene {
         });
         coin.destroy();
         this.addScore(mario.x, mario.y, '200');
+    };
+
+    onCollectSuperMushroom = (
+        mario: MarioPlayer,
+        mushroom: Types.Physics.Arcade.SpriteWithDynamicBody
+    ) => {
+        this.physics.world.pause();
+        mario.setData('block', true);
+        mario.anims.play('mario-collect-super-mushroom');
+        mario.setData('type', 'grown');
+        mushroom.destroy();
+        playSound(this, 'powerup', {
+            volume: 0.2,
+        });
+
+        mario.on(Animations.Events.ANIMATION_COMPLETE, () => {
+            this.physics.world.resume();
+            mario.setData('block', false);
+            mario.setDisplaySize(18, 32).setScale(2).body?.setSize(18, 32);
+        });
     };
 
     addScore = (x: number, y: number, scoreTxt: string) => {

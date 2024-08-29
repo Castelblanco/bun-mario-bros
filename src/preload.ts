@@ -16,6 +16,14 @@ export class PreloadScene extends Scene {
             frameHeight: 16,
         });
         this.load.spritesheet(
+            'mario-grown',
+            'images/entities/mario-grown.png',
+            {
+                frameWidth: 18,
+                frameHeight: 32,
+            }
+        );
+        this.load.spritesheet(
             'goomba',
             'images/entities/overworld/goomba.png',
             {
@@ -29,9 +37,15 @@ export class PreloadScene extends Scene {
             frameHeight: 16,
         });
 
+        this.load.image(
+            'super-mushroom',
+            'images/collectibles/super-mushroom.png'
+        );
+
         this.load.audio('gameover', 'sound/music/gameover.mp3');
         this.load.audio('goomba-stomp', 'sound/effects/goomba-stomp.wav');
         this.load.audio('coin-pickup', 'sound/effects/coin.mp3');
+        this.load.audio('powerup', 'sound/effects/consume-powerup.mp3');
         this.load.on('complete', this.initGame);
     };
 
