@@ -6,6 +6,8 @@ const PRO = import.meta.env.PROD;
 
 export default new Game({
     type: AUTO,
+    width: 800,
+    height: 600,
     parent: 'app',
     backgroundColor: '#049cd8',
     scale: {
@@ -22,7 +24,5 @@ export default new Game({
             debug: !PRO,
         },
     },
-    width: 800,
-    height: 600,
     scene: [PreloadScene, GameScene],
 });
